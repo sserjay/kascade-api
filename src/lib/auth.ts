@@ -13,7 +13,7 @@ export const auth = betterAuth({
   },
   user: {
     deleteUser: { enabled: true },
-    changeEmail: { enabled: true },
+    changeEmail: { enabled: true, updateEmailWithoutVerification: true },
   },
   plugins: [openAPI()],
 });
