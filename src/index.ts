@@ -15,7 +15,6 @@ const app = new Elysia()
   .use(cors(corsConfig))
   .use(authGuard)
   .use(openApiPlugin)
-  .get("/", () => "Hello Elysia")
   .listen(PORT);
 
 console.log(
