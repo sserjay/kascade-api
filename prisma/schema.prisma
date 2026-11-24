@@ -6,6 +6,11 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+enum WorkspaceMemberRole {
+  ADMIN
+  MEMBER
+  CLIENT
+}
 
 model User {
   id            String    @id
@@ -18,8 +23,54 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  // Workspaces owned by this user
+  ownedWorkspaces Workspace[] @relation("WorkspaceOwner")
+
+  // Workspaces this user joined
+  joinedWorkspaces WorkspaceMember[]
+
   @@unique([email])
   @@map("user")
+}
+
+model Workspace {
+  id String @id @default(uuid())
+
+  name String
+  slug String
+  description String?
+
+  // Owner
+  ownerId String
+  owner User @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Members
+  members WorkspaceMember[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([ownerId])
+  @@map("workspace")
+}
+
+model WorkspaceMember {
+  id           String              @id @default(uuid())
+
+  role         WorkspaceMemberRole @default(MEMBER)
+
+  userId       String
+  user User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  joinedAt     DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@map("workspace_member")
 }
 
 model Session {
