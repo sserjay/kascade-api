@@ -2,20 +2,35 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { openAPI } from "better-auth/plugins";
+import { workspaceService } from "../modules/workspace/service";
 
 export const auth = betterAuth({
   basePath: "/api",
+
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+
   emailAndPassword: {
     enabled: true,
   },
+
   user: {
     deleteUser: { enabled: true },
     changeEmail: { enabled: true, updateEmailWithoutVerification: true },
   },
+
   plugins: [openAPI()],
+
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          await workspaceService.createWorkspaceAfterSignUp(user.id);
+        },
+      },
+    },
+  },
 });
 
 let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>;
