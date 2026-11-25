@@ -1,6 +1,11 @@
 import Elysia from "elysia";
 import { authGuard } from "../../plugins/auth-guard";
-import { updateWorkspaceSchema, workspaceSchema } from "./model";
+import {
+  memberSchema,
+  updateMemberSchema,
+  updateWorkspaceSchema,
+  workspaceSchema,
+} from "./model";
 import { workspaceService } from "./service";
 
 export const workspaceModule = new Elysia({
@@ -70,7 +75,54 @@ export const workspaceModule = new Elysia({
   )
 
   // WORKSPACE MEMBERS
-  .get("/:id/members", async () => {})
-  .post("/:id/members", async () => {})
-  .patch("/:id/members/:userId", async () => {})
-  .delete("/:id/members/:userId", async () => {});
+  .get(
+    "/:id/members",
+    async ({ params: { id }, user }) => {
+      return workspaceService.getAllMembers(id, user.id);
+    },
+    { auth: true },
+  )
+  .post(
+    "/:id/members",
+    async ({ params: { id }, body, user, set }) => {
+      const member = await workspaceService.addMember(body, id, user.id);
+
+      set.status = 201;
+
+      return member;
+    },
+    {
+      auth: true,
+      body: memberSchema,
+    },
+  )
+  .patch(
+    "/:id/members/:userId",
+    async ({ params: { id, userId }, body, user, set }) => {
+      const member = await workspaceService.updateMember(
+        body,
+        id,
+        userId,
+        user.id,
+      );
+
+      set.status = 200;
+
+      return member;
+    },
+    {
+      auth: true,
+      body: updateMemberSchema,
+    },
+  )
+  .delete(
+    "/:id/members/:userId",
+    async ({ params: { id, userId }, user, set }) => {
+      const res = await workspaceService.deleteMember(id, userId, user.id);
+
+      set.status = 200;
+
+      return res;
+    },
+    { auth: true },
+  );
