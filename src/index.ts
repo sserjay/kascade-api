@@ -8,7 +8,7 @@ import { errorPlugin } from "./plugins/error";
 const PORT = Number(process.env.PORT) ?? 4000;
 
 const corsConfig = {
-  origin: String(process.env.FRONTEND_URL),
+  origin: String(process.env.FRONTEND_URL) ?? "http://localhost:3000",
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
 };

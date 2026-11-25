@@ -22,9 +22,9 @@ export const auth = betterAuth({
     changeEmail: { enabled: true, updateEmailWithoutVerification: true },
   },
 
-  plugins: [openAPI()],
-
   trustedOrigins: [String(process.env.FRONTEND_URL)],
+
+  plugins: [openAPI()],
 
   databaseHooks: {
     user: {
