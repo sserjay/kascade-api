@@ -13,6 +13,8 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+    minPasswordLength: 8,
+    maxPasswordLength: 128,
   },
 
   user: {
@@ -21,6 +23,8 @@ export const auth = betterAuth({
   },
 
   plugins: [openAPI()],
+
+  trustedOrigins: [String(process.env.FRONTEND_URL)],
 
   databaseHooks: {
     user: {

@@ -3,6 +3,7 @@ import { Elysia } from "elysia";
 import { authGuard } from "./plugins/auth-guard";
 import { openApiPlugin } from "./plugins/openapi";
 import { workspaceModule } from "./modules/workspace";
+import { errorPlugin } from "./plugins/error";
 
 const PORT = Number(process.env.PORT) ?? 4000;
 
@@ -16,6 +17,7 @@ const app = new Elysia()
   .use(cors(corsConfig))
   .use(authGuard)
   .use(openApiPlugin)
+  .use(errorPlugin)
   .use(workspaceModule)
   .listen(PORT);
 

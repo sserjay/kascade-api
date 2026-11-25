@@ -8,6 +8,7 @@ import type {
 } from "./model";
 import { workspaceRepository } from "./repository";
 import { getWorkspaceAccess } from "./permissions";
+import { AppError } from "../../plugins/error";
 
 export const workspaceService = {
   // WORKSPACES
@@ -69,7 +70,7 @@ export const workspaceService = {
     const { workspace, role } = await getWorkspaceAccess(workspaceId, userId);
 
     if (role !== "OWNER" && role !== "ADMIN") {
-      throw new Error("You cannot update this workspace");
+      throw AppError.forbidden("You don't have permission");
     }
 
     const slug = data.name
@@ -86,7 +87,7 @@ export const workspaceService = {
     const { role } = await getWorkspaceAccess(workspaceId, userId);
 
     if (role !== "OWNER") {
-      throw new Error("You cannot delete this workspace");
+      throw AppError.forbidden("You don't have permission");
     }
 
     await workspaceRepository.delete(workspaceId);
@@ -103,7 +104,7 @@ export const workspaceService = {
     const workspace = await workspaceRepository.findAllMembers(workspaceId);
 
     if (!workspace) {
-      throw new Error("Workspace not found");
+      throw AppError.notFound("Workspace not found");
     }
 
     return [
@@ -129,18 +130,18 @@ export const workspaceService = {
     );
 
     if (currentRole !== "OWNER" && currentRole !== "ADMIN") {
-      throw new Error("You don't have permission to add members");
+      throw AppError.forbidden("You don't have permission");
     }
 
     // Only OWNER can assign ADMIN
     if (body.role === "ADMIN" && currentRole !== "OWNER") {
-      throw new Error("Only workspace owners can assign ADMIN role");
+      throw AppError.forbidden("You don't have permission");
     }
 
     const user = await workspaceRepository.findUserByEmail(body.email.trim());
 
     if (!user) {
-      throw new Error("User is not registered yet");
+      throw AppError.notFound("User not found");
     }
 
     const existingMember = await workspaceRepository.findWorkspaceMember(
@@ -149,11 +150,12 @@ export const workspaceService = {
     );
 
     if (existingMember) {
-      throw new Error("User is already a member");
+      throw AppError.conflict("User is already a member");
     }
 
     return workspaceRepository.createMember(workspaceId, user.id, body.role);
   },
+
   updateMember: async (
     body: UpdateMemberBody,
     workspaceId: string,
@@ -166,7 +168,7 @@ export const workspaceService = {
     );
 
     if (currentRole !== "OWNER" && currentRole !== "ADMIN") {
-      throw new Error("You don't have permission to update members");
+      throw AppError.forbidden("You don't have permission");
     }
 
     const member = await workspaceRepository.findWorkspaceMember(
@@ -175,19 +177,20 @@ export const workspaceService = {
     );
 
     if (!member) {
-      throw new Error("Member not found");
+      throw AppError.notFound("Member not found");
     }
 
     if (currentRole === "ADMIN" && member.role === "ADMIN") {
-      throw new Error("Admins cannot update other admins");
+      throw AppError.forbidden("You don't have permission");
     }
 
     if (currentRole === "ADMIN" && body.role === "ADMIN") {
-      throw new Error("Only owners can assign ADMIN role");
+      throw AppError.forbidden("You don't have permission");
     }
 
     return workspaceRepository.updateMember(workspaceId, memberId, body.role);
   },
+
   deleteMember: async (
     workspaceId: string,
     memberId: string,
@@ -199,7 +202,7 @@ export const workspaceService = {
     );
 
     if (currentRole !== "OWNER") {
-      throw new Error("You don't have permission to update members");
+      throw AppError.forbidden("You don't have permission");
     }
 
     const member = await workspaceRepository.findWorkspaceMember(
@@ -208,7 +211,7 @@ export const workspaceService = {
     );
 
     if (!member) {
-      throw new Error("Member not found");
+      throw AppError.notFound("Member not found");
     }
 
     await workspaceRepository.deleteMember(workspaceId, memberId);
