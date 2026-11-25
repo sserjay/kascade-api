@@ -8,7 +8,7 @@ export const openApiPlugin = new Elysia({ name: "openapi-plugin" }).use(
       components: await OpenAPI.components,
       paths: await OpenAPI.getPaths(),
       info: {
-        title: "Qanvas API Documentation",
+        title: "Kascade API Docs",
         version: "1.0.0",
       },
       tags: [
