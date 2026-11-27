@@ -69,7 +69,7 @@ export const workspaceService = {
   ) => {
     const { workspace, role } = await getWorkspaceAccess(workspaceId, userId);
 
-    if (role !== "OWNER" && role !== "ADMIN") {
+    if (role !== "OWNER") {
       throw AppError.forbidden("You don't have permission");
     }
 
@@ -80,7 +80,16 @@ export const workspaceService = {
         })
       : workspace.slug;
 
-    return workspaceRepository.update(data, slug, workspaceId);
+    const updatedWorkspace = await workspaceRepository.update(
+      data,
+      slug,
+      workspaceId,
+    );
+
+    return {
+      workspace: updatedWorkspace,
+      role,
+    };
   },
 
   delete: async (workspaceId: string, userId: string) => {
