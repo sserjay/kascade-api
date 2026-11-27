@@ -97,12 +97,12 @@ export const workspaceModule = new Elysia({
     },
   )
   .patch(
-    "/:id/members/:userId",
-    async ({ params: { id, userId }, body, user, set }) => {
+    "/:id/members/:memberId",
+    async ({ params: { id, memberId }, body, user, set }) => {
       const member = await workspaceService.updateMember(
         body,
         id,
-        userId,
+        memberId,
         user.id,
       );
 
@@ -116,9 +116,9 @@ export const workspaceModule = new Elysia({
     },
   )
   .delete(
-    "/:id/members/:userId",
-    async ({ params: { id, userId }, user, set }) => {
-      const res = await workspaceService.deleteMember(id, userId, user.id);
+    "/:id/members/:memberId",
+    async ({ params: { id, memberId }, user, set }) => {
+      const res = await workspaceService.deleteMember(id, memberId, user.id);
 
       set.status = 200;
 
